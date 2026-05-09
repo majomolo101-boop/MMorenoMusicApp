@@ -1,14 +1,18 @@
 package com.pjasoft.mmorenomusicapp.screens
 
-import android.R
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -17,6 +21,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,7 +34,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.pjasoft.mmorenomusicapp.components.AlbumCard
+import com.pjasoft.mmorenomusicapp.data.Album
+import com.pjasoft.mmorenomusicapp.data.RetrofitClient
 import com.pjasoft.mmorenomusicapp.ui.theme.MMorenoMusicAppTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+
 
 @Composable
 fun HomeScreen() {
@@ -36,6 +51,22 @@ fun HomeScreen() {
             .statusBarsPadding()
 
     ) {
+
+        val service = RetrofitClient.instance
+        var albums by remember { mutableStateOf(listOf<Album>()) }
+
+        LaunchedEffect(true) {
+            try {
+                val result = async(Dispatchers.IO) {
+                    service.getAlbums()
+                }
+                    val list = result.await()
+                    Log.i("HomeScreen", "Álbumes recibidos: ${list.size}") // Esto saldrá en tu Logcat
+                    albums = list
+                } catch (e: Exception) {
+                    Log.e("HomeScreen", "Error: ${e.message}")
+                }
+            }
 
         // 1. HEADER
         Box(
@@ -75,7 +106,7 @@ fun HomeScreen() {
                     .align(Alignment.BottomStart)
             ) {
                 Text(
-                    text = "Good Mornig!",
+                    text = "Good Morning!",
                     color = Color.White.copy(alpha = 0.9f),
                     style = MaterialTheme.typography.titleMedium
                 )
@@ -89,8 +120,22 @@ fun HomeScreen() {
         }
 
 
+        // 2. ALBUMS
+        Text(
+            text = "Albums",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
 
-
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(albums) { album ->
+                AlbumCard(album = album)
+            }
+        }
 
 
 
@@ -104,6 +149,7 @@ fun HomeScreen() {
 @Preview(
     showBackground = true,
     showSystemUi = true)
+
 @Composable
 fun HomeScreenPreview() {
     MMorenoMusicAppTheme() {

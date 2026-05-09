@@ -9,7 +9,7 @@ interface MusicService {
     @GET("albums")
     suspend fun getAlbums(): List<Album>
 
-    @GET("albums/{id]")
+    @GET("albums/{id}")
     suspend fun getAlbumDetail(@Path("id") id: Int): Album
 }
 
