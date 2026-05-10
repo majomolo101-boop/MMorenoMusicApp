@@ -29,7 +29,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.pjasoft.mmorenomusicapp.data.Album
+import com.pjasoft.mmorenomusicapp.models.Album
 
 @Composable
 fun AlbumCard(album: Album) {
@@ -105,7 +105,7 @@ fun AlbumCard(album: Album) {
 
                     // 4. BOTON PLAY
                     Surface(
-                        shape = androidx.compose.foundation.shape.CircleShape, // Círculo perfecto
+                        shape = androidx.compose.foundation.shape.CircleShape,
                         color = Color.White,
                         modifier = Modifier
                             .size(34.dp)
@@ -118,7 +118,7 @@ fun AlbumCard(album: Album) {
                                 imageVector = Icons.Default.PlayArrow,
                                 contentDescription = null,
                                 tint = Color.Black,
-                                modifier = Modifier.size(24.dp) // Tamaño fijo del icono, sin padding excesivo
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                     }

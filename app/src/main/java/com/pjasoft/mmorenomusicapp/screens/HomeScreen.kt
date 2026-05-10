@@ -13,13 +13,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -43,8 +43,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.pjasoft.mmorenomusicapp.components.AlbumCard
-import com.pjasoft.mmorenomusicapp.data.Album
-import com.pjasoft.mmorenomusicapp.data.RetrofitClient
+import com.pjasoft.mmorenomusicapp.components.MiniPlayer
+import com.pjasoft.mmorenomusicapp.models.Album
+import com.pjasoft.mmorenomusicapp.services.RetrofitClient
 import com.pjasoft.mmorenomusicapp.ui.theme.MMorenoMusicAppTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -52,134 +53,153 @@ import kotlinx.coroutines.async
 
 @Composable
 fun HomeScreen() {
-    Column(
+    val service = RetrofitClient.instance
+    var albums by remember { mutableStateOf(listOf<Album>()) }
+
+    LaunchedEffect(true) {
+        try {
+            val result = async(Dispatchers.IO) {
+                service.getAlbums()
+            }
+            val list = result.await()
+            Log.i("HomeScreen", "Álbumes recibidos: ${list.size}") // Esto saldrá en tu Logcat
+            albums = list
+        } catch (e: Exception) {
+            Log.e("HomeScreen", "Error: ${e.message}")
+        }
+    }
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF3E5F5))
-            .statusBarsPadding()
+    )
+    {
 
-    ) {
-
-        val service = RetrofitClient.instance
-        var albums by remember { mutableStateOf(listOf<Album>()) }
-
-        LaunchedEffect(true) {
-            try {
-                val result = async(Dispatchers.IO) {
-                    service.getAlbums()
-                }
-                    val list = result.await()
-                    Log.i("HomeScreen", "Álbumes recibidos: ${list.size}") // Esto saldrá en tu Logcat
-                    albums = list
-                } catch (e: Exception) {
-                    Log.e("HomeScreen", "Error: ${e.message}")
-                }
-            }
-
-        // 1. HEADER
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .height(160.dp)
-                .clip(RoundedCornerShape(32.dp))
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFF9D50FF),
-                            Color(0xFF6E22FF)
-                        )
-                    )
-                )
-                .padding(24.dp)
-        ){
-            // 1.1 ICONOS
-            Icon(
-                imageVector = Icons.Default.Menu,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.align(Alignment.TopStart)
-            )
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-            )
-
-            // 1.2 SALUDO
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-            ) {
-                Text(
-                    text = "Good Morning!",
-                    color = Color.White.copy(alpha = 0.9f),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = "Maria Moreno",
-                    color = Color.White,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-
-
-        // 2. ALBUMS
-        Text(
-            text = "Albums",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
-
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(albums) { album ->
-                AlbumCard(album = album)
-            }
-        }
-
-
-        // 3. RECENTLY PLAYED
-        Row (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Recently Played",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "See more",
-                color = Color(0xFF9D50FF)
-            )
-        }
-
-        // 3.1. LISTA VERTICAL
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .fillMaxSize()
+                .statusBarsPadding()
+                .padding(bottom = 80.dp)
         ) {
-            albums.take(4).forEach { album ->
-                RecentlyPlayedRow(album)
+
+            // 1. HEADER
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .height(160.dp)
+                    .clip(RoundedCornerShape(32.dp))
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFF9D50FF),
+                                Color(0xFF6E22FF)
+                            )
+                        )
+                    )
+                    .padding(24.dp)
+            ) {
+                // 1.1 ICONOS
+                Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.align(Alignment.TopStart)
+                )
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                )
+
+                // 1.2 SALUDO
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                ) {
+                    Text(
+                        text = "Good Morning!",
+                        color = Color.White.copy(alpha = 0.9f),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "Maria Moreno",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+
+            // 2. ALBUMS
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Albums",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Text("See more", color = Color(0xFF9D50FF))
+            }
+
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(albums) { album ->
+                    AlbumCard(album = album)
+                }
+            }
+
+
+            // 3. RECENTLY PLAYED
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    "Recently Played",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Text("See more", color = Color(0xFF9D50FF))
+
+            }
+
+            //3.1 LISTA
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                items(albums) { album ->
+                    RecentlyPlayedRow(album)
+                }
             }
         }
 
-
-
+        // 4. MINI PLAYER
+        if (albums.isNotEmpty()) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+            ) {
+                MiniPlayer(album = albums[0])
+            }
+        }
     }
 }
+
 
 
 

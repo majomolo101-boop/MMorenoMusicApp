@@ -1,4 +1,4 @@
-package com.pjasoft.mmorenomusicapp.data
+package com.pjasoft.mmorenomusicapp.models
 
 import kotlinx.serialization.Serializable
 
@@ -7,6 +7,6 @@ data class Album(
     val id: String,
     val title: String,
     val artist: String,
-    val description: String? = null,
+    val description: String,
     val image: String
 )
