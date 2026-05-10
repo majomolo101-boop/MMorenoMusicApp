@@ -24,15 +24,20 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.pjasoft.mmorenomusicapp.components.MiniPlayer
+import com.pjasoft.mmorenomusicapp.models.Album
 import com.pjasoft.mmorenomusicapp.services.RetrofitClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 
+
+
 @Composable
 fun DetailScreen(albumId: String, navController: NavController) {
     val service = RetrofitClient.instance
-    var album by remember { mutableStateOf<com.pjasoft.mmorenomusicapp.models.Album?>(null) }
+    var album by remember { mutableStateOf<Album?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var hasError by remember { mutableStateOf(false) }
+
 
     LaunchedEffect(albumId) {
         try {
@@ -41,6 +46,7 @@ fun DetailScreen(albumId: String, navController: NavController) {
             isLoading = false
         } catch (e: Exception) {
             Log.e("DetailScreen", "Error: ${e.message}")
+            hasError = true
             isLoading = false
         }
     }
@@ -48,6 +54,13 @@ fun DetailScreen(albumId: String, navController: NavController) {
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
+        }
+        return
+    }
+
+    if (hasError) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Error al cargar el álbum", color = Color.Red)
         }
         return
     }
@@ -220,23 +233,25 @@ fun DetailScreen(albumId: String, navController: NavController) {
                 }
             }
 
-            // 3. ARTISTA
-            item {
-                Card(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .wrapContentWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
-                ) {
-                    Text(
-                        text = "Artist: ${currentAlbum.artist}",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        fontWeight = FontWeight.Bold
-                    )
+
+                // 3. ARTISTA
+                item {
+                    Card(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .wrapContentWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                    ) {
+                        Text(
+                            text = "Artist: ${currentAlbum.artist}",
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+
 
             // 4. LISTA CANCIONES
             items(10) { index ->
@@ -286,6 +301,7 @@ fun DetailScreen(albumId: String, navController: NavController) {
                 }
             }
         }
+
 
         // 5. MINI PLAYER
         Box(

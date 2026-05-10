@@ -46,8 +46,8 @@ import coil3.compose.AsyncImage
 import com.pjasoft.mmorenomusicapp.components.AlbumCard
 import com.pjasoft.mmorenomusicapp.components.MiniPlayer
 import com.pjasoft.mmorenomusicapp.models.Album
+import com.pjasoft.mmorenomusicapp.navigation.DetailRoute
 import com.pjasoft.mmorenomusicapp.services.RetrofitClient
-import com.pjasoft.mmorenomusicapp.ui.theme.MMorenoMusicAppTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 
@@ -56,6 +56,7 @@ import kotlinx.coroutines.async
 fun HomeScreen(navController: NavHostController) {
     val service = RetrofitClient.instance
     var albums by remember { mutableStateOf(listOf<Album>()) }
+    var hasError by remember { mutableStateOf(false) }
 
     LaunchedEffect(true) {
         try {
@@ -63,12 +64,22 @@ fun HomeScreen(navController: NavHostController) {
                 service.getAlbums()
             }
             val list = result.await()
-            Log.i("HomeScreen", "Álbumes recibidos: ${list.size}") // Esto saldrá en tu Logcat
+            Log.i("HomeScreen", "Álbumes recibidos: ${list.size}")
             albums = list
         } catch (e: Exception) {
             Log.e("HomeScreen", "Error: ${e.message}")
+            hasError = true
         }
     }
+    if (hasError) {
+        Box(modifier = Modifier
+            .fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Error al cargar los álbumes", color = Color.Red)
+        }
+        return
+    }
+
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -156,7 +167,7 @@ fun HomeScreen(navController: NavHostController) {
             ) {
                 items(albums) { album ->
                     AlbumCard(album = album,
-                        onClick = { navController.navigate("detail/${album.id}")
+                        onClick = { navController.navigate(DetailRoute(albumId = album.id))
                         }
                     )
                 }
@@ -187,7 +198,7 @@ fun HomeScreen(navController: NavHostController) {
             ) {
                 items(albums) { album ->
                     RecentlyPlayedRow(album = album,
-                        onClick = { navController.navigate("detail/${album.id}")
+                        onClick = { navController.navigate(DetailRoute(albumId = album.id))
                         }
                         )
                 }
