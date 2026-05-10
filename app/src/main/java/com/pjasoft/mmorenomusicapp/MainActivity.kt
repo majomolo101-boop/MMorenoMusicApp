@@ -15,6 +15,7 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.crossfade
+import com.pjasoft.mmorenomusicapp.navigation.NavGraph
 import com.pjasoft.mmorenomusicapp.screens.HomeScreen
 import com.pjasoft.mmorenomusicapp.ui.theme.MMorenoMusicAppTheme
 import okhttp3.OkHttpClient
@@ -51,7 +52,7 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen()
+                    NavGraph()
                 }
                 }
             }

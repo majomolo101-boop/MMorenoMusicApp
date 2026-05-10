@@ -32,8 +32,9 @@ import coil3.compose.AsyncImage
 import com.pjasoft.mmorenomusicapp.models.Album
 
 @Composable
-fun AlbumCard(album: Album) {
+fun AlbumCard(album: Album, onClick: () -> Unit) {
     Card(
+        onClick = onClick,
         modifier = Modifier
             .width(210.dp)
             .height(180.dp),

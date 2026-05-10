@@ -41,6 +41,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.pjasoft.mmorenomusicapp.components.AlbumCard
 import com.pjasoft.mmorenomusicapp.components.MiniPlayer
@@ -52,7 +53,7 @@ import kotlinx.coroutines.async
 
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavHostController) {
     val service = RetrofitClient.instance
     var albums by remember { mutableStateOf(listOf<Album>()) }
 
@@ -154,7 +155,10 @@ fun HomeScreen() {
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(albums) { album ->
-                    AlbumCard(album = album)
+                    AlbumCard(album = album,
+                        onClick = { navController.navigate("detail/${album.id}")
+                        }
+                    )
                 }
             }
 
@@ -182,7 +186,10 @@ fun HomeScreen() {
                     .padding(horizontal = 16.dp)
             ) {
                 items(albums) { album ->
-                    RecentlyPlayedRow(album)
+                    RecentlyPlayedRow(album = album,
+                        onClick = { navController.navigate("detail/${album.id}")
+                        }
+                        )
                 }
             }
         }
@@ -205,8 +212,9 @@ fun HomeScreen() {
 
 
 @Composable
-fun RecentlyPlayedRow(album: Album) {
+fun RecentlyPlayedRow(album: Album, onClick: () -> Unit) {
     Card(
+        onClick =onClick,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp),
@@ -264,7 +272,7 @@ fun RecentlyPlayedRow(album: Album) {
 
 
 
-
+/*
 @Preview(
     showBackground = true,
     showSystemUi = true)
@@ -275,3 +283,4 @@ fun HomeScreenPreview() {
         HomeScreen()
     }
 }
+*/
